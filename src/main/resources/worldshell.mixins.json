@@ -4,8 +4,7 @@
   "package": "net.snakefangox.worldshell.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "collision.BoxMixin",
-    "collision.VoxelShapesMixin",
+    "EntityMixin",
     "entitytracking.EntityTrackingSectionMixin",
     "entitytracking.ServerEntityManagerAccess",
     "entitytracking.ServerWorldAccess",

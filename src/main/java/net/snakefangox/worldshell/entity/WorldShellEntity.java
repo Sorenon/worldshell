@@ -1,5 +1,10 @@
 package net.snakefangox.worldshell.entity;
 
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btCompoundShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -31,7 +36,7 @@ import net.minecraft.world.explosion.Explosion;
 import net.snakefangox.worldshell.WSNetworking;
 import net.snakefangox.worldshell.WorldShellMain;
 import net.snakefangox.worldshell.collision.EntityBounds;
-import net.snakefangox.worldshell.collision.ShellCollisionHull;
+import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.math.Quaternion;
 import net.snakefangox.worldshell.storage.Bay;
 import net.snakefangox.worldshell.storage.LocalSpace;
@@ -57,28 +62,52 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 	private static final TrackedData<Vec3d> BLOCK_OFFSET = DataTracker.registerData(WorldShellEntity.class, WSNetworking.VEC3D);
 	private static final TrackedData<Quaternion> ROTATION = DataTracker.registerData(WorldShellEntity.class, WSNetworking.QUATERNION);
 
-	private final WorldShellSettings settings;
-	private final Microcosm microcosm;
-	private final ShellCollisionHull hull = new ShellCollisionHull(this);
+    private final WorldShellSettings settings;
+    private final Microcosm microcosm;
+
+    public final btCompoundShape btHullShape;
+    public final btRigidBody physicsBody;
 
 	private int shellId = 0;
 	private Quaternion inverseRotation = Quaternion.IDENTITY;
 
-	public WorldShellEntity(EntityType<?> type, World world, WorldShellSettings shellSettings) {
-		super(type, world);
-		this.settings = shellSettings;
-		microcosm = world.isClient() ? new Microcosm(this, settings.updateFrames()) : new Microcosm(this);
-	}
+    public WorldShellEntity(EntityType<?> type, World world, WorldShellSettings shellSettings) {
+        super(type, world);
+        this.settings = shellSettings;
+        microcosm = world.isClient() ? new Microcosm(this, settings.updateFrames()) : new Microcosm(this);
+        btHullShape = new btCompoundShape();
+        physicsBody = new btRigidBody(0, new btDefaultMotionState(), btHullShape, new Vector3());
+    }
 
-	public void initializeWorldShell(Map<BlockPos, BlockState> stateMap, Map<BlockPos, BlockEntity> entityMap, List<Microcosm.ShellTickInvoker> tickers) {
-		microcosm.setWorld(stateMap, entityMap, tickers);
-		hull.onWorldshellUpdate();
-	}
+    public void initializeWorldShell(Map<BlockPos, BlockState> stateMap, Map<BlockPos, BlockEntity> entityMap, List<Microcosm.ShellTickInvoker> tickers) {
+        PhysicsWorld physicsWorld;
+        if (world.isClient) {
+            physicsWorld = PhysicsWorld.CLIENT;
+        } else {
+            physicsWorld = PhysicsWorld.SERVER;
+        }
 
-	public void updateWorldShell(BlockPos pos, BlockState state, NbtCompound tag) {
-		microcosm.setBlock(pos, state, tag);
-		hull.onWorldshellUpdate();
-	}
+        Matrix4 transform = new Matrix4();
+
+        for (var pair : stateMap.entrySet()) {
+            var pos = pair.getKey();
+            var blockShape = physicsWorld.getOrMakeBlockShape(pair.getValue());
+            transform.setTranslation(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
+            btHullShape.addChildShape(transform, blockShape);
+        }
+
+        if (world.isClient) {
+            PhysicsWorld.CLIENT.dynamicsWorld.addRigidBody(physicsBody);
+        } else {
+            PhysicsWorld.SERVER.dynamicsWorld.addRigidBody(physicsBody);
+        }
+
+        microcosm.setWorld(stateMap, entityMap, tickers);
+    }
+
+    public void updateWorldShell(BlockPos pos, BlockState state, NbtCompound tag) {
+        microcosm.setBlock(pos, state, tag);
+    }
 
 	@Override
 	protected void initDataTracker() {
@@ -87,20 +116,29 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 		getDataTracker().startTracking(ROTATION, new Quaternion());
 	}
 
-	@Override
-	public void remove(RemovalReason reason) {
-		super.remove(reason);
-		if (world.isClient()) return;
-		getBay().ifPresent(b -> b.setLoadForChunks(world.getServer(), false));
-		if (reason.shouldDestroy()) {
-			Consumer<WorldShellEntity> onDestroy = settings.onDestroy(this);
-			if (onDestroy != null) {
-				onDestroy.accept(this);
-			} else {
-				WorldShellDeconstructor.create(this, settings.getRotationSolver(this), settings.getConflictSolver(this)).deconstruct();
-			}
-		}
-	}
+    @Override
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
+
+        if (world.isClient) {
+            PhysicsWorld.CLIENT.dynamicsWorld.removeRigidBody(physicsBody);
+        } else {
+            PhysicsWorld.SERVER.dynamicsWorld.removeRigidBody(physicsBody);
+        }
+        physicsBody.dispose();
+        btHullShape.dispose();
+
+        if (world.isClient()) return;
+        getBay().ifPresent(b -> b.setLoadForChunks(world.getServer(), false));
+        if (reason.shouldDestroy()) {
+            Consumer<WorldShellEntity> onDestroy = settings.onDestroy(this);
+            if (onDestroy != null) {
+                onDestroy.accept(this);
+            } else {
+                WorldShellDeconstructor.create(this, settings.getRotationSolver(this), settings.getConflictSolver(this)).deconstruct();
+            }
+        }
+    }
 
 	@Override
 	public void tick() {
@@ -163,9 +201,10 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 		getDataTracker().set(ENTITY_BOUNDS, entityBounds);
 	}
 
-	public void setBlockOffset(Vec3d offset) {
-		getDataTracker().set(BLOCK_OFFSET, offset);
-	}
+    public void setBlockOffset(Vec3d offset) {
+        getDataTracker().set(BLOCK_OFFSET, offset);
+        updatePhysicsBody();
+    }
 
 	@Override
 	public ActionResult interact(PlayerEntity player, Hand hand) {
@@ -175,10 +214,10 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 		return super.interact(player, hand);
 	}
 
-	@Override
-	public boolean isCollidable() {
-		return settings.doCollision(this);
-	}
+    @Override
+    public boolean isCollidable() {
+        return false;
+    }
 
 	@Override
 	public boolean handleAttack(Entity attacker) {
@@ -189,21 +228,15 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 		return super.handleAttack(attacker);
 	}
 
-	@Override
-	public void onTrackedDataSet(TrackedData<?> data) {
-		if (ENTITY_BOUNDS.equals(data)) {
-			dimensions = getDataTracker().get(ENTITY_BOUNDS);
-			hull.calculateCrudeBounds();
-		} else if (ROTATION.equals(data)) {
-			inverseRotation = getDataTracker().get(ROTATION).inverse();
-			if (hull != null) hull.calculateCrudeBounds();
-		}
-	}
-
-	@Override
-	public Box getBoundingBox() {
-		return hull.getDelegateBox();
-	}
+    @Override
+    public void onTrackedDataSet(TrackedData<?> data) {
+        if (ENTITY_BOUNDS.equals(data)) {
+            dimensions = getDataTracker().get(ENTITY_BOUNDS);
+        } else if (ROTATION.equals(data)) {
+            inverseRotation = getDataTracker().get(ROTATION).inverse();
+        }
+        updatePhysicsBody();
+    }
 
 	@Override
 	public void onStartedTrackingBy(ServerPlayerEntity player) {
@@ -226,11 +259,38 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 		return getDataTracker().get(ENTITY_BOUNDS);
 	}
 
-	@Override
-	public final void setPos(double x, double y, double z) {
-		super.setPos(x, y, z);
-		if (hull != null) hull.calculateCrudeBounds();
-	}
+    @Override
+    public final void setPos(double x, double y, double z) {
+        super.setPos(x, y, z);
+
+        if (physicsBody != null) {
+            updatePhysicsBody();
+        }
+    }
+
+    public void updatePhysicsBody() {
+        Vec3d pos = getBlockOffset().add(getPos());
+        float x = (float) pos.x;
+        float y = (float) pos.y;
+        float z = (float) pos.z;
+
+        Matrix4 transform = physicsBody.getWorldTransform();
+        var rot = getRotation();
+        transform.setToTranslation(x, y, z);
+        transform.rotate(new com.badlogic.gdx.math.Quaternion((float) rot.getX(), (float) rot.getY(), (float) rot.getZ(), (float) rot.getW()));
+        physicsBody.setWorldTransform(transform);
+
+        Vector3 min = new Vector3();
+        Vector3 max = new Vector3();
+        physicsBody.getAabb(min, max);
+
+        this.setBoundingBox(new Box(min.x, min.y, min.z, max.x, max.y, max.z));
+    }
+
+    @Override
+    protected Box calculateBoundingBox() {
+        return this.getBoundingBox();
+    }
 
 	@Override
 	public void setListener(EntityChangeListener listener) {

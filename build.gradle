@@ -54,6 +54,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    implementation "com.badlogicgames.gdx:gdx-bullet:${project.libgdk_version}"
+    implementation "com.badlogicgames.gdx:gdx-bullet-platform:${project.libgdk_version}:natives-desktop"
+
     // Needed for the test mod
     testmodImplementation sourceSets.main.output
     testmodImplementation name: 'rapid-register-0.1.0'
