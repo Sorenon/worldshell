@@ -5,17 +5,20 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.data.TrackedDataHandler;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
@@ -187,9 +190,19 @@ public class WSNetworking {
 						BlockHitResult gHit = new BlockHitResult(bay.get().toGlobal(hit.getPos()),
 								hit.getSide(), bp, hit.isInsideBlock());
 						if (interact) {
-							world.getBlockState(gHit.getBlockPos()).onUse(world, player, hand, gHit);
+//							world.getBlockState(gHit.getBlockPos()).onUse(world, player, hand, gHit);
+							if (world.getBlockState(gHit.getBlockPos()).onUse(world, player, hand, gHit).isAccepted() || !player.isCreative()) {
+								return;
+							}
+							World playerWorld = player.world;
+							player.world = world;
+							player.getStackInHand(hand).useOnBlock(new ItemUsageContext(player, hand, gHit));
+							player.world = playerWorld;
 						} else {
-							world.getBlockState(gHit.getBlockPos()).onBlockBreakStart(world, gHit.getBlockPos(), player);
+							if (player.isCreative()) {
+//								world.getBlockState(gHit.getBlockPos()).onBlockBreakStart(world, gHit.getBlockPos(), player);
+								world.setBlockState(gHit.getBlockPos(), Blocks.AIR.getDefaultState());
+							}
 						}
 					}
 				}
