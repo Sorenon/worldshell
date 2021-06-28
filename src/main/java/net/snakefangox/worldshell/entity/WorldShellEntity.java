@@ -44,12 +44,13 @@ import net.snakefangox.worldshell.storage.Bay;
 import net.snakefangox.worldshell.storage.LocalSpace;
 import net.snakefangox.worldshell.storage.Microcosm;
 import net.snakefangox.worldshell.storage.ShellStorageData;
-import net.snakefangox.worldshell.transfer.WorldShellDeconstructor;
 import net.snakefangox.worldshell.util.WSNbtHelper;
 import net.snakefangox.worldshell.util.WorldShellPacketHelper;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * The basic entity that links to a shell, renders it's contents and handles interaction.
@@ -103,9 +104,11 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
         physicsBody.setCollisionShape(btHullShape);
 
         physicsWorld.dynamicsWorld.addRigidBody(physicsBody);
+
+        updatePhysicsBody();
     }
 
-    private void buildHullShape(PhysicsWorld physicsWorld, Set<Map.Entry<BlockPos, BlockState>> blocks) {
+    protected void buildHullShape(PhysicsWorld physicsWorld, Set<Map.Entry<BlockPos, BlockState>> blocks) {
         Matrix4 transform = new Matrix4();
 
         for (var pair : blocks) {

@@ -39,8 +39,9 @@ public class Bay implements LocalSpace {
 		this.bounds = new BlockBox(center);
 	}
 
-	public Bay(NbtCompound tag) {
+	public Bay(NbtCompound tag, Runnable markDirtyFunc) {
 		fromNbt(tag);
+		this.markDirtyFunc = markDirtyFunc;
 	}
 
 	public void fromNbt(NbtCompound tag) {

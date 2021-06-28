@@ -39,22 +39,22 @@ public class FakeApp implements Application {
 
     @Override
     public void log(String tag, String message) {
-        Logger.getLogger(tag).warning(message);
+        Logger.getLogger(tag).info(message);
     }
 
     @Override
     public void log(String tag, String message, Throwable exception) {
-        Logger.getLogger(tag).warning(message + ":" + exception.toString());
+        Logger.getLogger(tag).info(message + ":" + exception.toString());
     }
 
     @Override
     public void error(String tag, String message) {
-        Logger.getLogger(tag).severe(message);
+        Logger.getLogger(tag).warning(message);
     }
 
     @Override
     public void error(String tag, String message, Throwable exception) {
-        Logger.getLogger(tag).severe(message + ":" + exception.toString());
+        Logger.getLogger(tag).warning(message + ":" + exception.toString());
     }
 
     @Override

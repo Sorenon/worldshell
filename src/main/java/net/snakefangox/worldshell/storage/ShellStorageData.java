@@ -34,7 +34,7 @@ public class ShellStorageData extends PersistentState {
 		storageData.bufferSpace = tag.getInt("bufferSpace");
 		NbtCompound bayList = tag.getCompound("bayList");
 		for (String key : bayList.getKeys()) {
-			storageData.bays.put(Integer.valueOf(key), new Bay(bayList.getCompound(key)));
+			storageData.bays.put(Integer.valueOf(key), new Bay(bayList.getCompound(key), storageData::markDirty));
 		}
 		int[] eb = tag.getIntArray("emptyBays");
 		storageData.emptyBays.clear();
@@ -72,7 +72,6 @@ public class ShellStorageData extends PersistentState {
 	public int addBay(Bay bay) {
 		int id = findEmptyIndex(true);
 		bays.put(id, bay);
-		bay.markDirtyFunc = this::markDirty;
 		markDirty();
 		return id;
 	}

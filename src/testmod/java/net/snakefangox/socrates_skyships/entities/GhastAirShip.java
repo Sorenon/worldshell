@@ -1,14 +1,22 @@
 package net.snakefangox.socrates_skyships.entities;
 
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.snakefangox.socrates_skyships.SRegister;
 import net.snakefangox.worldshell.entity.WorldShellEntity;
+import net.snakefangox.worldshell.kevlar.PhysicsWorld;
+
+import java.util.Map;
+import java.util.Set;
 
 public class GhastAirShip extends WorldShellEntity {
     private static final TrackedData<Boolean> SHOOTING = DataTracker.registerData(GhastEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -50,5 +58,15 @@ public class GhastAirShip extends WorldShellEntity {
     @Override
     public boolean isAlive() {
         return false;
+    }
+
+    @Override
+    protected void buildHullShape(PhysicsWorld physicsWorld, Set<Map.Entry<BlockPos, BlockState>> blocks) {
+        super.buildHullShape(physicsWorld, blocks);
+
+        var transform = new Matrix4();
+        var shape = physicsWorld.getOrMakeBoxShape(new Vector3(4.5f / 2, 4.5f / 2, 4.5f / 2));
+        transform.setTranslation(0, -3.5f, 0);
+        btHullShape.addChildShape(transform, shape);
     }
 }
