@@ -22,9 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class EntityMixin {
 
     @Shadow
-    public abstract Box getBoundingBox();
-
-    @Shadow
     public EntityDimensions dimensions;
 
     @Shadow
@@ -40,16 +37,7 @@ public abstract class EntityMixin {
     public World world;
 
     @Shadow
-    public abstract void updatePosition(double x, double y, double z);
-
-    @Shadow
-    public abstract void setPos(double x, double y, double z);
-
-    @Shadow
     public abstract void setPosition(Vec3d pos);
-
-    @Shadow
-    private Vec3d pos;
 
     @Shadow
     public abstract void setVelocity(Vec3d velocity);
@@ -67,7 +55,8 @@ public abstract class EntityMixin {
     @Shadow
     public abstract Vec3d getPos();
 
-    @Shadow public boolean horizontalCollision;
+    @Shadow
+    public boolean horizontalCollision;
     private static btCollisionObject playerObj = null;
 
     @Inject(method = "move", at = @At("RETURN"))
@@ -81,10 +70,47 @@ public abstract class EntityMixin {
             var callback = new KevlarContactResultCallback();
 
             if (world.isClient) {
+                System.out.println("#############");
+                System.out.println(player.getVelocity());
                 callback.obj = playerObj;
                 callback.callback = (normalFromOther, distance) -> {
 //                    System.out.println("dist:" + distance + ", normal:" + normalFromOther);
 
+                    Vector3 offset = normalFromOther.scl(distance).scl(0, 1, 0);
+
+                    if (offset.len2() == 0) {
+                        System.out.println("Cancel:" + offset);
+                        return;
+                    } else {
+                        System.out.println("MMMMM:" + offset);
+                    }
+
+                    this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
+
+                    Matrix4 mat = playerObj.getWorldTransform();
+                    mat.translate(offset);
+                    playerObj.setWorldTransform(mat);
+
+                    if (offset.y > 0) {
+                        this.onGround = true;
+                    }
+                    if (offset.y > 0 && velocity.y < 0 || offset.y < 0 && velocity.y > 0) {
+                        this.setVelocity(this.getVelocity().multiply(1, 0, 1));
+                        this.verticalCollision = true;
+                    }
+                };
+
+                Box box = this.dimensions.getBoxAt(Vec3d.ZERO);
+                Matrix4 translation = new Matrix4();
+                translation.setToTranslation((float) this.getX(), (float) this.getY() + (float) box.getYLength() / 2, (float) this.getZ());
+                playerObj.setWorldTransform(translation);
+                playerObj.setCollisionShape(PhysicsWorld.CLIENT.getOrMakeBoxShape(box));
+
+                PhysicsWorld.CLIENT.dynamicsWorld.contactTest(playerObj, callback);
+
+                System.out.println("~~~~~~~~~~~");
+                callback.done.clear();
+                callback.callback = (normalFromOther, distance) -> {
                     Vector3 offset = normalFromOther.scl(distance);
 
                     this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
@@ -109,14 +135,8 @@ public abstract class EntityMixin {
                         this.horizontalCollision = true;
                     }
                 };
-
-                Box box = this.dimensions.getBoxAt(Vec3d.ZERO).expand(0.1);
-                Matrix4 translation = new Matrix4();
-                translation.setToTranslation((float) this.getX(), (float) this.getY() + (float) box.getYLength() / 2, (float) this.getZ());
-                playerObj.setWorldTransform(translation);
-                playerObj.setCollisionShape(PhysicsWorld.CLIENT.getOrMakeBoxShape(box));
-
                 PhysicsWorld.CLIENT.dynamicsWorld.contactTest(playerObj, callback);
+                System.out.println(player.getVelocity());
             }
 
             callback.dispose();

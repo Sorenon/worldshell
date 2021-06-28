@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "EntityMixin",
+    "WorldMixin",
     "entitytracking.EntityTrackingSectionMixin",
     "entitytracking.ServerEntityManagerAccess",
     "entitytracking.ServerWorldAccess",

@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '0.8-SNAPSHOT'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_16
@@ -54,8 +55,8 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    implementation "com.badlogicgames.gdx:gdx-bullet:${project.libgdk_version}"
-    implementation "com.badlogicgames.gdx:gdx-bullet-platform:${project.libgdk_version}:natives-desktop"
+    shadow(implementation("com.badlogicgames.gdx:gdx-bullet:${project.libgdk_version}"))
+    shadow(implementation("com.badlogicgames.gdx:gdx-bullet-platform:${project.libgdk_version}:natives-desktop"))
 
     // Needed for the test mod
     testmodImplementation sourceSets.main.output
@@ -96,6 +97,15 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+}
+
+remapJar {
+    dependsOn shadowJar
+    input.set shadowJar.archiveFile.get()
 }
 
 // configure the maven publication
