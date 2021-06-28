@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.snakefangox.socrates_skyships.BlockScan;
 import net.snakefangox.socrates_skyships.SRegister;
 import net.snakefangox.socrates_skyships.entities.AirShip;
+import net.snakefangox.socrates_skyships.entities.GhastAirShip;
 import net.snakefangox.worldshell.transfer.WorldShellConstructor;
 import net.snakefangox.worldshell.world.Worldshell;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ public class ShipsHelm extends Block {
 		if (state.get(CONSTRUCTING)) return ActionResult.FAIL;
 		if (!(world instanceof ServerWorld)) return ActionResult.SUCCESS;
 
-		WorldShellConstructor<AirShip> airshipConstructor = WorldShellConstructor.create((ServerWorld) world, SRegister.AIRSHIP_TYPE, pos, new BlockScan(pos, world));
+		WorldShellConstructor<GhastAirShip> airshipConstructor = WorldShellConstructor.create((ServerWorld) world, SRegister.AIRSHIP_TYPE2, pos, new BlockScan(pos, world));
 		world.setBlockState(pos, state.with(CONSTRUCTING, true));
 		airshipConstructor.construct();
 		return ActionResult.SUCCESS;
