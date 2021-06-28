@@ -21,6 +21,7 @@ import net.minecraft.world.World;
 import net.snakefangox.socrates_skyships.SRegister;
 import net.snakefangox.worldshell.entity.WorldShellEntity;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
+import net.snakefangox.worldshell.math.Quaternion;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -86,6 +87,11 @@ public class GhastAirShip extends WorldShellEntity {
     }
 
     @Override
+    public Vec3d getBlockOffset() {
+        return new Vec3d(0, 1, 0);
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (this.isLogicalSideForUpdatingMovement()) {
@@ -104,6 +110,11 @@ public class GhastAirShip extends WorldShellEntity {
                 Vec3d look = player.getRotationVec(1.0f);
                 look = look.multiply(player.forwardSpeed * 0.04);
                 velocity = velocity.add(look);
+
+//                float yaw = getYaw();
+//                yaw -= player.sidewaysSpeed * 5;
+//                setYaw(yaw);
+//                this.setRotation(new Quaternion().fromAngles(0, Math.toRadians(-yaw), 0));
             }
             this.setVelocity(velocity);
             this.velocityDirty = true;
@@ -116,13 +127,14 @@ public class GhastAirShip extends WorldShellEntity {
 
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
-        if (player.shouldCancelInteraction()) {
-            return ActionResult.PASS;
-        }
-        if (!this.world.isClient) {
-            return player.startRiding(this) ? ActionResult.CONSUME : ActionResult.PASS;
-        } else {
-            return ActionResult.SUCCESS;
-        }
+//        if (player.shouldCancelInteraction()) {
+//            return ActionResult.PASS;
+//        }
+//        if (!this.world.isClient) {
+//            return player.startRiding(this) ? ActionResult.CONSUME : ActionResult.PASS;
+//        } else {
+//            return ActionResult.SUCCESS;
+//        }
+        return super.interact(player, hand);
     }
 }

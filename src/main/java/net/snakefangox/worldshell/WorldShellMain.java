@@ -58,28 +58,6 @@ public class WorldShellMain implements ModInitializer {
 		Gdx.app = new FakeApp();
 		Bullet.init();
 
-		WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-			if (MinecraftClient.getInstance().options.debugEnabled) {
-                var matrices = context.matrixStack();
-                matrices.push();
-
-                Vec3d camPos = context.camera().getPos();
-                matrices.translate(-camPos.x, -camPos.y, -camPos.z);
-
-//				var physicsWorld = ((WorldExt)context.world()).getPhysics();
-				var physicsWorld = ((WorldExt)MinecraftClient.getInstance().getServer().getOverworld()).getPhysics();
-
-                physicsWorld.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
-
-                physicsWorld.debugDrawer.modelMatrix = matrices.peek().getModel();
-                physicsWorld.debugDrawer.normalMatrix = matrices.peek().getNormal();
-
-                physicsWorld.dynamicsWorld.debugDrawWorld();
-
-                matrices.pop();
-            }
-		});
-
 		LOGGER.info("Moving blocks and fudging collision!");
 		LOGGER.info("(Worldshell has started successfully)");
 	}

@@ -10,6 +10,7 @@ import net.minecraft.client.render.entity.model.GhastEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3d;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.snakefangox.socrates_skyships.entities.GhastAirShip;
@@ -44,7 +45,7 @@ public class GhastShipRenderer extends EntityRenderer<GhastAirShip> {
         matrices.push();
         var offset = entity.getBlockOffset();
         matrices.translate(offset.x, offset.y, offset.z);
-        WorldShellRender.renderMicrocosm(entity, matrices, vertexConsumers, light);
+        WorldShellRender.renderMicrocosm(entity.getMicrocosm(), matrices, Vec3f.POSITIVE_Y.getDegreesQuaternion(-yaw), entity.world.getRandom(), vertexConsumers, tickDelta);
 
         matrices.pop();
     }

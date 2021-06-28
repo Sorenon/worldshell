@@ -24,6 +24,6 @@
     "fabricloader": ">=0.11.0",
     "fabric": "*",
     "minecraft": ">=1.17",
-    "worldshell": ">=0.1.0"
+    "worldshell_fork": ">=0.1.0"
   }
 }
