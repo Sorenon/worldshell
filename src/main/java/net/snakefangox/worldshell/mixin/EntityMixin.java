@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.snakefangox.worldshell.kevlar.KevlarContactResultCallback;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
+import net.snakefangox.worldshell.mixinextras.WorldExt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,6 +58,7 @@ public abstract class EntityMixin {
 
     @Shadow
     public boolean horizontalCollision;
+
     private static btCollisionObject playerObj = null;
 
     @Inject(method = "move", at = @At("RETURN"))
@@ -68,6 +70,8 @@ public abstract class EntityMixin {
             }
 
             var callback = new KevlarContactResultCallback();
+
+            PhysicsWorld physicsWorld = ((WorldExt)world).getPhysics();
 
             if (world.isClient) {
                 System.out.println("#############");
@@ -104,9 +108,9 @@ public abstract class EntityMixin {
                 Matrix4 translation = new Matrix4();
                 translation.setToTranslation((float) this.getX(), (float) this.getY() + (float) box.getYLength() / 2, (float) this.getZ());
                 playerObj.setWorldTransform(translation);
-                playerObj.setCollisionShape(PhysicsWorld.CLIENT.getOrMakeBoxShape(box));
+                playerObj.setCollisionShape(physicsWorld.getOrMakeBoxShape(box));
 
-                PhysicsWorld.CLIENT.dynamicsWorld.contactTest(playerObj, callback);
+                physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
 
                 System.out.println("~~~~~~~~~~~");
                 callback.done.clear();
@@ -135,7 +139,7 @@ public abstract class EntityMixin {
                         this.horizontalCollision = true;
                     }
                 };
-                PhysicsWorld.CLIENT.dynamicsWorld.contactTest(playerObj, callback);
+                physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
                 System.out.println(player.getVelocity());
             }
 

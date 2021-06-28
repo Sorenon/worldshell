@@ -38,6 +38,7 @@ import net.snakefangox.worldshell.WorldShellMain;
 import net.snakefangox.worldshell.collision.EntityBounds;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.math.Quaternion;
+import net.snakefangox.worldshell.mixinextras.WorldExt;
 import net.snakefangox.worldshell.storage.Bay;
 import net.snakefangox.worldshell.storage.LocalSpace;
 import net.snakefangox.worldshell.storage.Microcosm;
@@ -80,12 +81,7 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     }
 
     public void initializeWorldShell(Map<BlockPos, BlockState> stateMap, Map<BlockPos, BlockEntity> entityMap, List<Microcosm.ShellTickInvoker> tickers) {
-        PhysicsWorld physicsWorld;
-        if (world.isClient) {
-            physicsWorld = PhysicsWorld.CLIENT;
-        } else {
-            physicsWorld = PhysicsWorld.SERVER;
-        }
+        PhysicsWorld physicsWorld = ((WorldExt) world).getPhysics();
 
         Matrix4 transform = new Matrix4();
 
@@ -96,11 +92,7 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
             btHullShape.addChildShape(transform, blockShape);
         }
 
-        if (world.isClient) {
-            PhysicsWorld.CLIENT.dynamicsWorld.addRigidBody(physicsBody);
-        } else {
-            PhysicsWorld.SERVER.dynamicsWorld.addRigidBody(physicsBody);
-        }
+        physicsWorld.dynamicsWorld.addRigidBody(physicsBody);
 
         microcosm.setWorld(stateMap, entityMap, tickers);
     }
@@ -120,11 +112,8 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     public void remove(RemovalReason reason) {
         super.remove(reason);
 
-        if (world.isClient) {
-            PhysicsWorld.CLIENT.dynamicsWorld.removeRigidBody(physicsBody);
-        } else {
-            PhysicsWorld.SERVER.dynamicsWorld.removeRigidBody(physicsBody);
-        }
+        ((WorldExt) world).getPhysics().dynamicsWorld.removeRigidBody(physicsBody);
+
         physicsBody.dispose();
         btHullShape.dispose();
 

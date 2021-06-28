@@ -19,6 +19,7 @@ import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
+import net.snakefangox.worldshell.mixinextras.WorldExt;
 import net.snakefangox.worldshell.storage.EmptyChunkGenerator;
 import net.snakefangox.worldshell.storage.ShellStorageData;
 import net.snakefangox.worldshell.transfer.ShellTransferHandler;
@@ -60,12 +61,14 @@ public class WorldShellMain implements ModInitializer {
 			Vec3d camPos = context.camera().getPos();
 			matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 
-			PhysicsWorld.CLIENT.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
+			var physicsWorld = ((WorldExt)context.world()).getPhysics();
 
-			PhysicsWorld.CLIENT.debugDrawer.modelMatrix = matrices.peek().getModel();
-			PhysicsWorld.CLIENT.debugDrawer.normalMatrix = matrices.peek().getNormal();
+			physicsWorld.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
 
-			PhysicsWorld.CLIENT.dynamicsWorld.debugDrawWorld();
+			physicsWorld.debugDrawer.modelMatrix = matrices.peek().getModel();
+			physicsWorld.debugDrawer.normalMatrix = matrices.peek().getNormal();
+
+			physicsWorld.dynamicsWorld.debugDrawWorld();
 
 			matrices.pop();
 		});

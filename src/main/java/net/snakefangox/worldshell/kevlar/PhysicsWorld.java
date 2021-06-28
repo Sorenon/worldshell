@@ -17,9 +17,6 @@ import java.util.HashMap;
 
 public class PhysicsWorld implements Disposable {
 
-    public static PhysicsWorld CLIENT = new PhysicsWorld(); //TODO remove
-    public static PhysicsWorld SERVER = new PhysicsWorld(); //TODO remove
-
     public btCollisionConfiguration collisionConfiguration;
     public btCollisionDispatcher collisionDispatcher;
     public btBroadphaseInterface broadphase;
