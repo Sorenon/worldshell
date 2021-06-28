@@ -63,85 +63,74 @@ public abstract class EntityMixin {
 
     @Inject(method = "move", at = @At("RETURN"))
     void colMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
-        if ((Object) this instanceof PlayerEntity player) {
-//            PhysicsWorld.STATIC.dynamicsWorld.convexSweepTest();
+        //noinspection ConstantConditions
+        if ((Object) this instanceof PlayerEntity) {
             if (playerObj == null) {
                 playerObj = new btCollisionObject();
             }
 
             var callback = new KevlarContactResultCallback();
 
-            PhysicsWorld physicsWorld = ((WorldExt)world).getPhysics();
+            PhysicsWorld physicsWorld = ((WorldExt) world).getPhysics();
 
-            if (world.isClient) {
-                System.out.println("#############");
-                System.out.println(player.getVelocity());
-                callback.obj = playerObj;
-                callback.callback = (normalFromOther, distance) -> {
-//                    System.out.println("dist:" + distance + ", normal:" + normalFromOther);
+            callback.obj = playerObj;
+            callback.callback = (normalFromOther, penetration) -> {
+                Vector3 offset = normalFromOther.scl(penetration).scl(0, 1, 0);
 
-                    Vector3 offset = normalFromOther.scl(distance).scl(0, 1, 0);
+                if (offset.len2() == 0) {
+                    return;
+                }
 
-                    if (offset.len2() == 0) {
-                        System.out.println("Cancel:" + offset);
-                        return;
-                    } else {
-                        System.out.println("MMMMM:" + offset);
-                    }
+                this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
 
-                    this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
+                Matrix4 mat = playerObj.getWorldTransform();
+                mat.translate(offset);
+                playerObj.setWorldTransform(mat);
 
-                    Matrix4 mat = playerObj.getWorldTransform();
-                    mat.translate(offset);
-                    playerObj.setWorldTransform(mat);
+                if (offset.y > 0) {
+                    this.onGround = true;
+                }
+                if (offset.y > 0 && velocity.y < 0 || offset.y < 0 && velocity.y > 0) {
+                    this.setVelocity(this.getVelocity().multiply(1, 0, 1));
+                    this.verticalCollision = true;
+                }
+            };
 
-                    if (offset.y > 0) {
-                        this.onGround = true;
-                    }
-                    if (offset.y > 0 && velocity.y < 0 || offset.y < 0 && velocity.y > 0) {
-                        this.setVelocity(this.getVelocity().multiply(1, 0, 1));
-                        this.verticalCollision = true;
-                    }
-                };
+            Box box = this.dimensions.getBoxAt(Vec3d.ZERO);
+            Matrix4 translation = new Matrix4();
+            translation.setToTranslation((float) this.getX(), (float) this.getY() + (float) box.getYLength() / 2, (float) this.getZ());
+            playerObj.setWorldTransform(translation);
+            playerObj.setCollisionShape(physicsWorld.getOrMakeBoxShape(box));
 
-                Box box = this.dimensions.getBoxAt(Vec3d.ZERO);
-                Matrix4 translation = new Matrix4();
-                translation.setToTranslation((float) this.getX(), (float) this.getY() + (float) box.getYLength() / 2, (float) this.getZ());
-                playerObj.setWorldTransform(translation);
-                playerObj.setCollisionShape(physicsWorld.getOrMakeBoxShape(box));
+            physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
 
-                physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
+            callback.done.clear();
+            callback.callback = (normalFromOther, penetration) -> {
+                Vector3 offset = normalFromOther.scl(penetration);
 
-                System.out.println("~~~~~~~~~~~");
-                callback.done.clear();
-                callback.callback = (normalFromOther, distance) -> {
-                    Vector3 offset = normalFromOther.scl(distance);
+                this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
 
-                    this.setPosition(this.getPos().add(offset.x, offset.y, offset.z));
+                Matrix4 mat = playerObj.getWorldTransform();
+                mat.translate(offset);
+                playerObj.setWorldTransform(mat);
 
-                    Matrix4 mat = playerObj.getWorldTransform();
-                    mat.translate(offset);
-                    playerObj.setWorldTransform(mat);
-
-                    if (offset.y > 0) {
-                        this.onGround = true;
-                    }
-                    if (offset.y > 0 && velocity.y < 0 || offset.y < 0 && velocity.y > 0) {
-                        this.setVelocity(this.getVelocity().multiply(1, 0, 1));
-                        this.verticalCollision = true;
-                    }
-                    if (offset.x > 0 && velocity.x < 0 || offset.x < 0 && velocity.x > 0) {
-                        this.setVelocity(this.getVelocity().multiply(0, 1, 1));
-                        this.horizontalCollision = true;
-                    }
-                    if (offset.z > 0 && velocity.z < 0 || offset.z < 0 && velocity.z > 0) {
-                        this.setVelocity(this.getVelocity().multiply(1, 1, 0));
-                        this.horizontalCollision = true;
-                    }
-                };
-                physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
-                System.out.println(player.getVelocity());
-            }
+                if (offset.y > 0) {
+                    this.onGround = true;
+                }
+                if (offset.y > 0 && velocity.y < 0 || offset.y < 0 && velocity.y > 0) {
+                    this.setVelocity(this.getVelocity().multiply(1, 0, 1));
+                    this.verticalCollision = true;
+                }
+                if (offset.x > 0 && velocity.x < 0 || offset.x < 0 && velocity.x > 0) {
+                    this.setVelocity(this.getVelocity().multiply(0, 1, 1));
+                    this.horizontalCollision = true;
+                }
+                if (offset.z > 0 && velocity.z < 0 || offset.z < 0 && velocity.z > 0) {
+                    this.setVelocity(this.getVelocity().multiply(1, 1, 0));
+                    this.horizontalCollision = true;
+                }
+            };
+            physicsWorld.dynamicsWorld.contactTest(playerObj, callback);
 
             callback.dispose();
         }

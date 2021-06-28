@@ -20,22 +20,6 @@ public class KevlarContactResultCallback extends ContactResultCallback {
 
     @Override
     public float addSingleResult(btManifoldPoint cp, btCollisionObjectWrapper colObj0Wrap, int partId0, int index0, btCollisionObjectWrapper colObj1Wrap, int partId1, int index1) {
-        {
-            Vector3 normalFromOther = new Vector3();
-            cp.getNormalWorldOnB(normalFromOther);
-            float distance = Math.abs(cp.getDistance()); //Not sure about this
-
-            if (colObj1Wrap.getCollisionObject() == obj) {
-                normalFromOther = new Vector3().sub(normalFromOther);
-            }
-
-            if (colObj0Wrap.getCollisionObject() == obj) {
-                System.out.println("dist:" + distance + ", normal:" + normalFromOther + ", obj:" + colObj1Wrap + ", index:" + index1);
-            } else {
-                System.out.println("dist:" + distance + ", normal:" + normalFromOther + ", obj:" + colObj0Wrap + ", index:" + index0);
-            }
-        }
-
         if (colObj0Wrap.getCollisionObject() == obj) {
             if (!done.add(new ShapeRecord(colObj1Wrap, index1))) {
                 return 1;
@@ -45,17 +29,20 @@ public class KevlarContactResultCallback extends ContactResultCallback {
                 return 1;
             }
         }
-        System.out.println("YES");
-//                    System.out.println("dist:" + distance + ", normal:" + normalFromOther);
+
         Vector3 normalFromOther = new Vector3();
         cp.getNormalWorldOnB(normalFromOther);
-        float distance = Math.abs(cp.getDistance()); //Not sure about this
+        float penetration = -cp.getDistance();
+
+        if (penetration <= 0) {
+            return 1;
+        }
 
         if (colObj1Wrap.getCollisionObject() == obj) {
             normalFromOther = new Vector3().sub(normalFromOther);
         }
 
-        callback.apply(normalFromOther, distance);
+        callback.apply(normalFromOther, penetration);
 
         return 1;
     }
@@ -65,6 +52,6 @@ public class KevlarContactResultCallback extends ContactResultCallback {
 
     @FunctionalInterface
     public interface Callback {
-        void apply(Vector3 normalFromOther, float distance);
+        void apply(Vector3 normalFromOther, float penetration);
     }
 }

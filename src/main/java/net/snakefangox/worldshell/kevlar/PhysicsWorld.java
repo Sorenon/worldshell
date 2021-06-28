@@ -74,6 +74,15 @@ public class PhysicsWorld implements Disposable {
         broadphase.dispose();
         collisionDispatcher.dispose();
         collisionConfiguration.dispose();
+
+        for (var shape : blockShapes.values()) {
+            if (!(shape instanceof btBoxShape)) {
+                shape.dispose();
+            }
+        }
+        for (var shape : boxShapes.values()) {
+            shape.dispose();
+        }
     }
 
     public btBoxShape getOrMakeBoxShape(Box box) {
