@@ -47,9 +47,7 @@ import net.snakefangox.worldshell.transfer.WorldShellDeconstructor;
 import net.snakefangox.worldshell.util.WSNbtHelper;
 import net.snakefangox.worldshell.util.WorldShellPacketHelper;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -66,8 +64,8 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     private final WorldShellSettings settings;
     private final Microcosm microcosm;
 
-    public final btCompoundShape btHullShape;
     public final btRigidBody physicsBody;
+    public btCompoundShape btHullShape;
 
 	private int shellId = 0;
 	private Quaternion inverseRotation = Quaternion.IDENTITY;
@@ -83,14 +81,7 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     public void initializeWorldShell(Map<BlockPos, BlockState> stateMap, Map<BlockPos, BlockEntity> entityMap, List<Microcosm.ShellTickInvoker> tickers) {
         PhysicsWorld physicsWorld = ((WorldExt) world).getPhysics();
 
-        Matrix4 transform = new Matrix4();
-
-        for (var pair : stateMap.entrySet()) {
-            var pos = pair.getKey();
-            var blockShape = physicsWorld.getOrMakeBlockShape(pair.getValue());
-            transform.setTranslation(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
-            btHullShape.addChildShape(transform, blockShape);
-        }
+        buildHullShape(physicsWorld, stateMap.entrySet());
 
         physicsWorld.dynamicsWorld.addRigidBody(physicsBody);
 
@@ -99,6 +90,37 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 
     public void updateWorldShell(BlockPos pos, BlockState state, NbtCompound tag) {
         microcosm.setBlock(pos, state, tag);
+
+        var physicsWorld = ((WorldExt) world).getPhysics();
+        physicsWorld.dynamicsWorld.removeRigidBody(physicsBody);
+
+        btHullShape.dispose();
+        btHullShape = new btCompoundShape();
+
+        buildHullShape(physicsWorld, microcosm.getBlocks());
+
+        physicsBody.setCollisionShape(btHullShape);
+
+        physicsWorld.dynamicsWorld.addRigidBody(physicsBody);
+    }
+
+    private void buildHullShape(PhysicsWorld physicsWorld, Set<Map.Entry<BlockPos, BlockState>> blocks) {
+        Matrix4 transform = new Matrix4();
+
+        for (var pair : blocks) {
+            var pos = pair.getKey();
+            var blockShape = physicsWorld.getOrMakeBlockShape(pair.getValue());
+            if (blockShape instanceof btCompoundShape) {
+                transform.setTranslation(pos.getX(), pos.getY(), pos.getZ());
+            } else {
+                var voxelShape = pair.getValue().getCollisionShape(null, null);
+                if (!voxelShape.isEmpty()) { //TODO remove need for this check
+                    var center = voxelShape.getBoundingBox().getCenter();
+                    transform.setTranslation(pos.getX() + (float) center.x, pos.getY() + (float) center.y, pos.getZ() + (float) center.z);
+                }
+            }
+            btHullShape.addChildShape(transform, blockShape);
+        }
     }
 
 	@Override
