@@ -46,4 +46,9 @@ public class GhastAirShip extends WorldShellEntity {
             this.fireballStrength = nbt.getByte("ExplosionPower");
         }
     }
+
+    @Override
+    public boolean isAlive() {
+        return false;
+    }
 }

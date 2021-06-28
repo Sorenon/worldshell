@@ -1,5 +1,6 @@
 package net.snakefangox.worldshell.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
@@ -56,15 +57,15 @@ public class WorldShellRenderCache {
 		float tickDelta = MinecraftClient.getInstance().getTickDelta();
 		double fov = ((GameRendererAccess) gameRenderer).invokeGetFov(gameRenderer.getCamera(), tickDelta, true);
 		Matrix4f proj = gameRenderer.getBasicProjectionMatrix(fov);
-		renderLayers.forEach((key) -> {
-			if (bufferFilled.contains(key)) {
-				VertexBuffer entry = bufferStorage.get(key);
-				key.startDrawing();
+		for (RenderLayer renderLayer : renderLayers) {
+			if (bufferFilled.contains(renderLayer)) {
+				VertexBuffer entry = bufferStorage.get(renderLayer);
+				renderLayer.startDrawing();
 				entry.bind();
-				entry.setShader(matrices.peek().getModel(), proj, GameRenderer.getBlockShader());
-				key.endDrawing();
+				entry.setShader(matrices.peek().getModel(), proj, RenderSystem.getShader());
+				renderLayer.endDrawing();
 			}
-		});
+		}
 	}
 
 	public void reset() {

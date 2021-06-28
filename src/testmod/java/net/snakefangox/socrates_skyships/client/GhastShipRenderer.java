@@ -33,8 +33,7 @@ public class GhastShipRenderer extends EntityRenderer<GhastAirShip> {
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
 
         matrices.push();
-//        matrices.translate(0, 3, 0);
-        matrices.translate(0, 4.5, 0);
+        matrices.translate(0, 2.5, 0);
         matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180f));
         matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yaw));
         matrices.scale(4.5F, 4.5F, 4.5F);
