@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "worldshell",
+  "id": "worldshell_fork",
   "version": "${version}",
-  "name": "WorldShell",
+  "name": "WorldShell Fork",
   "description": "A library mod to allow moving collections of blocks that can function, collide and interact with the world around them.",
   "authors": [
-    "Snakefangox"
+    "Snakefangox", "Sorenon"
   ],
   "contact": {},
   "license": "MIT",
