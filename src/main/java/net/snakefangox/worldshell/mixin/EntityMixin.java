@@ -64,6 +64,9 @@ public abstract class EntityMixin {
     @Shadow
     public abstract Box getBoundingBox();
 
+    @Shadow
+    public boolean noClip;
+
     @Inject(method = "move", at = @At("RETURN"))
     void colMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
         //noinspection ConstantConditions
@@ -72,7 +75,7 @@ public abstract class EntityMixin {
 //                colObj = new btCollisionObject();
 //            }
         //noinspection ConstantConditions
-        if ((Object) this instanceof WorldShellEntity ||
+        if (this.noClip || (Object) this instanceof WorldShellEntity ||
                 world.getEntitiesByType(TypeFilter.instanceOf(WorldShellEntity.class), this.getBoundingBox(), e -> true).size() == 0)
             return;
 
