@@ -44,7 +44,7 @@ public abstract class ExplosionMixin {
 
 	@Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;squaredDistanceTo(Lnet/minecraft/util/math/Vec3d;)D", ordinal = 0),
 			locals = LocalCapture.CAPTURE_FAILSOFT)
-	public void collectBlocksAndDamageEntities(CallbackInfo ci, Set set, float q, int r, int s, int t, int u, int v, int w, List list, Vec3d vec3d, int k, Entity entity) {
+	public void collectBlocksAndDamageEntities(CallbackInfo ci, Set set, int q, float r, int s, int t, int u, int v, int w, int l, List list, Vec3d vec3d, int k, Entity entity) {
 		if (entity instanceof WorldShellEntity) {
 			((WorldShellEntity) entity).passThroughExplosion(x, y, z, power, createFire, destructionType);
 		}

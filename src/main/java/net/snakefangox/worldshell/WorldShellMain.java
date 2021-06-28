@@ -1,10 +1,12 @@
 package net.snakefangox.worldshell;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
@@ -18,6 +20,7 @@ import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.snakefangox.worldshell.kevlar.FakeApp;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.mixinextras.WorldExt;
 import net.snakefangox.worldshell.storage.EmptyChunkGenerator;
@@ -52,25 +55,28 @@ public class WorldShellMain implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(ShellTransferHandler::serverEndTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(ShellTransferHandler::serverStopping);
 
+		Gdx.app = new FakeApp();
 		Bullet.init();
 
 		WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-			var matrices = context.matrixStack();
-			matrices.push();
+			if (MinecraftClient.getInstance().options.debugEnabled) {
+                var matrices = context.matrixStack();
+                matrices.push();
 
-			Vec3d camPos = context.camera().getPos();
-			matrices.translate(-camPos.x, -camPos.y, -camPos.z);
+                Vec3d camPos = context.camera().getPos();
+                matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 
-			var physicsWorld = ((WorldExt)context.world()).getPhysics();
+                var physicsWorld = ((WorldExt)context.world()).getPhysics();
 
-			physicsWorld.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
+                physicsWorld.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
 
-			physicsWorld.debugDrawer.modelMatrix = matrices.peek().getModel();
-			physicsWorld.debugDrawer.normalMatrix = matrices.peek().getNormal();
+                physicsWorld.debugDrawer.modelMatrix = matrices.peek().getModel();
+                physicsWorld.debugDrawer.normalMatrix = matrices.peek().getNormal();
 
-			physicsWorld.dynamicsWorld.debugDrawWorld();
+                physicsWorld.dynamicsWorld.debugDrawWorld();
 
-			matrices.pop();
+                matrices.pop();
+            }
 		});
 
 		LOGGER.info("Moving blocks and fudging collision!");

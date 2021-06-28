@@ -134,30 +134,38 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     public void remove(RemovalReason reason) {
         super.remove(reason);
 
-        ((WorldExt) world).getPhysics().dynamicsWorld.removeRigidBody(physicsBody);
-
-        physicsBody.dispose();
-        btHullShape.dispose();
+        this.onRemoved();
 
         if (world.isClient()) return;
         getBay().ifPresent(b -> b.setLoadForChunks(world.getServer(), false));
-        if (reason.shouldDestroy()) {
-            Consumer<WorldShellEntity> onDestroy = settings.onDestroy(this);
-            if (onDestroy != null) {
-                onDestroy.accept(this);
-            } else {
-                WorldShellDeconstructor.create(this, settings.getRotationSolver(this), settings.getConflictSolver(this)).deconstruct();
-            }
-        }
+//        if (reason.shouldDestroy()) {
+//            Consumer<WorldShellEntity> onDestroy = settings.onDestroy(this);
+//            if (onDestroy != null) {
+//                onDestroy.accept(this);
+//            } else {
+//                WorldShellDeconstructor.create(this, settings.getRotationSolver(this), settings.getConflictSolver(this)).deconstruct();
+//            }
+//        }
     }
 
-	@Override
-	public void tick() {
-		super.tick();
-		if (world.isClient) {
-			microcosm.tick();
-		}
-	}
+    @Override
+    public void onRemoved() {
+        super.onRemoved();
+
+        ((WorldExt) world).getPhysics().dynamicsWorld.removeRigidBody(physicsBody);
+
+        physicsBody.getMotionState().dispose();
+        physicsBody.dispose();
+        btHullShape.dispose();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (world.isClient) {
+            microcosm.tick();
+        }
+    }
 
 	@Override
 	public boolean collides() {

@@ -7,6 +7,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.mixinextras.WorldExt;
+import net.snakefangox.worldshell.world.DelegateWorld;
+import net.snakefangox.worldshell.world.ShellStorageWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +25,12 @@ public class WorldMixin implements WorldExt {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     void init(MutableWorldProperties properties, RegistryKey<World> registryRef, DimensionType dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed, CallbackInfo ci) {
-        physicsWorld = new PhysicsWorld();
+        //noinspection ConstantConditions
+        if (!(
+                (Object) this instanceof DelegateWorld || (Object) this instanceof ShellStorageWorld
+        )) {
+            physicsWorld = new PhysicsWorld();
+        }
     }
 
     @Inject(method = "tickBlockEntities", at = @At("HEAD"))
