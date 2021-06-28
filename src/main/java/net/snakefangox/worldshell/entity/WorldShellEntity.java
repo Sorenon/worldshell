@@ -93,6 +93,10 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
     public void updateWorldShell(BlockPos pos, BlockState state, NbtCompound tag) {
         microcosm.setBlock(pos, state, tag);
 
+        rebuildHull();
+    }
+
+    public void rebuildHull() {
         var physicsWorld = ((WorldExt) world).getPhysics();
         physicsWorld.dynamicsWorld.removeRigidBody(physicsBody);
 
@@ -226,7 +230,7 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
 
     public void setBlockOffset(Vec3d offset) {
         getDataTracker().set(BLOCK_OFFSET, offset);
-        updatePhysicsBody();
+        rebuildHull();
     }
 
 	@Override
@@ -306,6 +310,16 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
         Vector3 min = new Vector3();
         Vector3 max = new Vector3();
         physicsBody.getAabb(min, max);
+
+        if (max.x - min.x < 1) {
+            max.x += 1;
+        }
+        if (max.y - min.y < 1) {
+            max.y += 1;
+        }
+        if (max.z - min.z < 1) {
+            max.z += 1;
+        }
 
         this.setBoundingBox(new Box(min.x, min.y, min.z, max.x, max.y, max.z));
     }

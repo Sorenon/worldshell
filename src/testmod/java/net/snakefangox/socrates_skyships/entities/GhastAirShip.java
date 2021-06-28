@@ -66,7 +66,8 @@ public class GhastAirShip extends WorldShellEntity {
 
         var transform = new Matrix4();
         var shape = physicsWorld.getOrMakeBoxShape(new Vector3(4.5f / 2, 4.5f / 2, 4.5f / 2));
-        transform.setTranslation(0, -3.5f, 0);
+        var blockOffset = this.getBlockOffset();
+        transform.setTranslation((float) -blockOffset.x, (float) (-2.5f -blockOffset.y), (float) -blockOffset.z);
         btHullShape.addChildShape(transform, shape);
     }
 }

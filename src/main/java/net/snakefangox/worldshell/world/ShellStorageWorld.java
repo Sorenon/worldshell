@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.MinecraftServer;
@@ -55,6 +56,13 @@ public class ShellStorageWorld extends ServerWorld implements Worldshell {
 				WorldShellPacketHelper.writeBlock(buf, this, pos, entity, bay);
 				boolean boundChanged = bay.updateBoxBounds(pos);
 				if (boundChanged) bay.setLoadForChunks(getServer(), true);
+
+				var blockEntity = getBlockEntity(pos);
+				if (blockEntity == null) {
+					entity.updateWorldShell(bay.toLocal(pos), state, new NbtCompound());
+				} else {
+					entity.updateWorldShell(bay.toLocal(pos), state, blockEntity.writeNbt(new NbtCompound()));
+				}
 				PlayerLookup.tracking(entity).forEach(player -> ServerPlayNetworking.send(player, WSNetworking.SHELL_UPDATE, buf));
 			});
 		}
