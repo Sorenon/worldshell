@@ -111,10 +111,9 @@ public class GhastAirShip extends WorldShellEntity {
                 look = look.multiply(player.forwardSpeed * 0.04);
                 velocity = velocity.add(look);
 
-//                float yaw = getYaw();
-//                yaw -= player.sidewaysSpeed * 5;
-//                setYaw(yaw);
-//                this.setRotation(new Quaternion().fromAngles(0, Math.toRadians(-yaw), 0));
+                float yaw = getYaw();
+                yaw -= player.sidewaysSpeed * 5;
+                setYaw(yaw);
             }
             this.setVelocity(velocity);
             this.velocityDirty = true;
@@ -126,15 +125,8 @@ public class GhastAirShip extends WorldShellEntity {
     }
 
     @Override
-    public ActionResult interact(PlayerEntity player, Hand hand) {
-//        if (player.shouldCancelInteraction()) {
-//            return ActionResult.PASS;
-//        }
-//        if (!this.world.isClient) {
-//            return player.startRiding(this) ? ActionResult.CONSUME : ActionResult.PASS;
-//        } else {
-//            return ActionResult.SUCCESS;
-//        }
-        return super.interact(player, hand);
+    public void setYaw(float yaw) {
+        super.setYaw(yaw);
+        this.setRotation(new Quaternion().fromAngles(0, Math.toRadians(-yaw), 0));
     }
 }

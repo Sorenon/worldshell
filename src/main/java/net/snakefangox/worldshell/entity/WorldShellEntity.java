@@ -40,10 +40,7 @@ import net.snakefangox.worldshell.collision.EntityBounds;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.math.Quaternion;
 import net.snakefangox.worldshell.mixinextras.WorldExt;
-import net.snakefangox.worldshell.storage.Bay;
-import net.snakefangox.worldshell.storage.LocalSpace;
-import net.snakefangox.worldshell.storage.Microcosm;
-import net.snakefangox.worldshell.storage.ShellStorageData;
+import net.snakefangox.worldshell.storage.*;
 import net.snakefangox.worldshell.util.WSNbtHelper;
 import net.snakefangox.worldshell.util.WorldShellPacketHelper;
 
@@ -233,27 +230,22 @@ public abstract class WorldShellEntity extends Entity implements LocalSpace {
         rebuildHull();
     }
 
-	@Override
-	public ActionResult interact(PlayerEntity player, Hand hand) {
-		if (world.isClient()) {
-			return handleInteraction(player, hand, true);
-		}
-		return super.interact(player, hand);
-	}
-
     @Override
-    public boolean isCollidable() {
-        return false;
+    public ActionResult interact(PlayerEntity player, Hand hand) {
+        if (world.isClient()) {
+            return handleInteraction(player, hand, true);
+        }
+        return super.interact(player, hand);
     }
 
-	@Override
-	public boolean handleAttack(Entity attacker) {
-		if (world.isClient() && attacker instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity) attacker;
-			handleInteraction(player, Hand.MAIN_HAND, false);
-		}
-		return super.handleAttack(attacker);
-	}
+    @Override
+    public boolean handleAttack(Entity attacker) {
+        if (world.isClient() && attacker instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) attacker;
+            handleInteraction(player, Hand.MAIN_HAND, false);
+        }
+        return super.handleAttack(attacker);
+    }
 
     @Override
     public void onTrackedDataSet(TrackedData<?> data) {

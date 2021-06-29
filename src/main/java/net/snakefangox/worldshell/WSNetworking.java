@@ -30,6 +30,7 @@ import net.snakefangox.worldshell.entity.WorldShellEntity;
 import net.snakefangox.worldshell.math.Quaternion;
 import net.snakefangox.worldshell.storage.Bay;
 import net.snakefangox.worldshell.storage.Microcosm;
+import net.snakefangox.worldshell.storage.ShellAwareBlock;
 import net.snakefangox.worldshell.util.WorldShellPacketHelper;
 
 import java.util.*;
@@ -179,10 +180,10 @@ public class WSNetworking {
 
 		server.execute(() -> {
 			Entity entity = player.world.getEntityById(entityID);
-			if (entity instanceof WorldShellEntity) {
-				EntityBounds dimensions = ((WorldShellEntity) entity).getDimensions();
+			if (entity instanceof WorldShellEntity wsEntity) {
+				EntityBounds dimensions = wsEntity.getDimensions();
 				if (player.distanceTo(entity) < dimensions.getRoughMaxDist() + 4.5) {
-					Optional<Bay> bay = ((WorldShellEntity) entity).getBay();
+					Optional<Bay> bay = wsEntity.getBay();
 					if (bay.isPresent()) {
 						World world = WorldShellMain.getStorageDim(server);
 						BlockPos bp = bay.get().toGlobal(hit.getBlockPos());
@@ -191,7 +192,15 @@ public class WSNetworking {
 								hit.getSide(), bp, hit.isInsideBlock());
 						if (interact) {
 //							world.getBlockState(gHit.getBlockPos()).onUse(world, player, hand, gHit);
-							if (world.getBlockState(gHit.getBlockPos()).onUse(world, player, hand, gHit).isAccepted() || !player.isCreative()) {
+
+							BlockState blockState = world.getBlockState(gHit.getBlockPos());
+							ActionResult result;
+							if (blockState.getBlock() instanceof ShellAwareBlock awareBlock) {
+								result = awareBlock.onUseWorldshell(wsEntity, blockState, world, gHit.getBlockPos(), player, hand, gHit);
+							} else {
+								result = blockState.onUse(world, player, hand, gHit);
+							}
+							if (result.isAccepted() || !player.isCreative()) {
 								return;
 							}
 							World playerWorld = player.world;
