@@ -80,12 +80,11 @@ public abstract class EntityMixin {
             return;
 
         var colObj = new btCollisionObject();
-
         var callback = new KevlarContactResultCallback();
+        callback.obj = colObj;
 
         PhysicsWorld physicsWorld = ((WorldExt) world).getPhysics();
 
-        callback.obj = colObj;
         callback.callback = (normalFromOther, penetration) -> {
             Vector3 offset = normalFromOther.scl(penetration).scl(0, 1, 0);
 

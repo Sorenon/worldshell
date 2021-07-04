@@ -9,6 +9,8 @@ import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.mixinextras.WorldExt;
 import net.snakefangox.worldshell.world.DelegateWorld;
 import net.snakefangox.worldshell.world.ShellStorageWorld;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,6 +23,9 @@ import java.util.function.Supplier;
 public class WorldMixin implements WorldExt {
 
     @Unique
+    private static final Logger LOGGER = LogManager.getLogger("GrappleShip");
+
+    @Unique
     private PhysicsWorld physicsWorld = null;
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -30,6 +35,8 @@ public class WorldMixin implements WorldExt {
                 (Object) this instanceof DelegateWorld || (Object) this instanceof ShellStorageWorld
         )) {
             physicsWorld = new PhysicsWorld();
+
+            LOGGER.info("Creating physics world:" + registryRef.toString() + "#" + this.getClass());
         }
     }
 
@@ -43,6 +50,9 @@ public class WorldMixin implements WorldExt {
     @Inject(method = "close", at = @At("RETURN"))
     void close(CallbackInfo ci) {
         if (physicsWorld != null) {
+
+            LOGGER.info("Closing  physics world:" + toString() + "#" + this.getClass());
+
             physicsWorld.dispose();
         }
     }

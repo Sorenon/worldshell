@@ -2,8 +2,8 @@ package net.snakefangox.worldshell.kevlar;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.utils.Clipboard;
-
-import java.util.logging.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class FakeApp implements Application {
     @Override
@@ -36,35 +36,39 @@ public class FakeApp implements Application {
         return null;
     }
 
-
+    private static final Logger LOGGER = LogManager.getLogger("GrappleShip");
+    
     @Override
     public void log(String tag, String message) {
-        Logger.getLogger(tag).info(message);
+        LOGGER.info(message);
     }
 
     @Override
     public void log(String tag, String message, Throwable exception) {
-        Logger.getLogger(tag).info(message + ":" + exception.toString());
+        LOGGER.info(message);
+        exception.printStackTrace();
     }
 
     @Override
     public void error(String tag, String message) {
-        Logger.getLogger(tag).warning(message);
+        LOGGER.error(message);
     }
 
     @Override
     public void error(String tag, String message, Throwable exception) {
-        Logger.getLogger(tag).warning(message + ":" + exception.toString());
+        LOGGER.error(message);
+        exception.printStackTrace();
     }
 
     @Override
     public void debug(String tag, String message) {
-        Logger.getLogger(tag).info(message);
+        LOGGER.info(message);
     }
 
     @Override
     public void debug(String tag, String message, Throwable exception) {
-        Logger.getLogger(tag).info(message + ":" + exception.toString());
+        LOGGER.info(message);
+        exception.printStackTrace();
     }
 
     @Override

@@ -6,6 +6,7 @@
   "mixins": [
     "DimTypeMixin",
     "EntityMixin",
+    "MinecraftClientMixin",
     "WorldMixin",
     "entitytracking.EntityTrackingSectionMixin",
     "entitytracking.ServerEntityManagerAccess",

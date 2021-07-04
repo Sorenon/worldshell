@@ -2,6 +2,9 @@ package net.snakefangox.socrates_skyships.entities;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -12,9 +15,9 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.BoatPaddleStateC2SPacket;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -22,8 +25,10 @@ import net.snakefangox.socrates_skyships.SRegister;
 import net.snakefangox.worldshell.entity.WorldShellEntity;
 import net.snakefangox.worldshell.kevlar.PhysicsWorld;
 import net.snakefangox.worldshell.math.Quaternion;
+import net.snakefangox.worldshell.storage.Bay;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -129,4 +134,27 @@ public class GhastAirShip extends WorldShellEntity {
         super.setYaw(yaw);
         this.setRotation(new Quaternion().fromAngles(0, Math.toRadians(-yaw), 0));
     }
+//
+//    public BiMap<Entity, BlockPos> seatBlocks = HashBiMap.create();
+//
+//    @Override
+//    protected boolean canAddPassenger(Entity passenger) {
+//        return seatBlocks.containsKey(passenger);
+//    }
+//
+//    @Override
+//    public void updatePassengerPosition(Entity passenger) {
+//        BlockPos pos = seatBlocks.get(passenger);
+//        if (pos == null) {
+//            super.updatePassengerPosition(passenger);
+//        } else {
+//            passenger.setPosition(toGlobal(new Vec3d(pos.getX(), pos.getY(), pos.getZ())));
+//        }
+//    }
+//
+//    @Override
+//    protected void removePassenger(Entity passenger) {
+//        super.removePassenger(passenger);
+//        seatBlocks.remove(passenger);
+//    }
 }
