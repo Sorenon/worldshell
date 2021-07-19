@@ -8,13 +8,10 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.GhastEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3d;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.snakefangox.socrates_skyships.entities.GhastAirShip;
-import net.snakefangox.worldshell.client.WorldShellRender;
+import net.snakefangox.worldshell_fork.client.WorldShellRender;
 
 public class GhastShipRenderer extends EntityRenderer<GhastAirShip> {
 

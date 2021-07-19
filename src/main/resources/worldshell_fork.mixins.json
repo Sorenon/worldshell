@@ -1,0 +1,32 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.snakefangox.worldshell_fork.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "DimTypeMixin",
+    "EntityMixin",
+    "MinecraftClientMixin",
+    "ServerPlayNetworkHandlerAcc",
+    "WorldMixin",
+    "entitytracking.EntityTrackingSectionMixin",
+    "entitytracking.ServerEntityManagerAccess",
+    "entitytracking.ServerWorldAccess",
+    "entitytracking.WorldMixin",
+    "passthrough.ExplosionMixin",
+    "passthrough.PlayerEntityMixin",
+    "passthrough.ServerPlayerEntityMixin",
+    "server.MinecraftServerMixin",
+    "transfer.AbstractBlockStateMixin"
+  ],
+  "client": [
+    "entitytracking.ClientEntityManagerAccess",
+    "entitytracking.ClientWorldAccess",
+    "rendering.GameRendererAccess"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

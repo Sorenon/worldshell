@@ -20,7 +20,7 @@
     ]
   },
   "mixins": [
-    "worldshell.mixins.json"
+    "worldshell_fork.mixins.json"
   ],
   "accessWidener": "worldshell.accesswidener",
   "depends": {
