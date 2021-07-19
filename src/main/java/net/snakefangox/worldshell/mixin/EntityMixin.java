@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -145,5 +146,10 @@ public abstract class EntityMixin {
 
         callback.dispose();
         colObj.dispose();
+
+        //noinspection ConstantConditions
+        if (this.onGround && (Object)this instanceof ServerPlayerEntity pe) {
+            ((ServerPlayNetworkHandlerAcc)pe.networkHandler).setFloatingTicks(0);
+        }
     }
 }

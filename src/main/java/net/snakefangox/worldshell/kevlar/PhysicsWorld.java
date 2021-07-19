@@ -101,23 +101,27 @@ public class PhysicsWorld implements Disposable {
 
     public btCollisionShape getOrMakeBlockShape(BlockState blockState) {
         return blockShapes.computeIfAbsent(blockState, _bs -> {
-            var voxelShape = blockState.getCollisionShape(null, null);
-            var boxes = voxelShape.getBoundingBoxes();
-            if (boxes.size() == 1) {
-                return getOrMakeBoxShape(boxes.get(0));
-            } else {
-                var shape = new btCompoundShape();
-                var matrix4 = new Matrix4();
-                for (var box : boxes) {
-                    var boxShape = getOrMakeBoxShape(box);
-                    var center = box.getCenter();
-                    matrix4.set(
-                            (float) center.x, (float) center.y, (float) center.z,
-                            0f, 0f, 0f, 1f
-                    );
-                    shape.addChildShape(matrix4, boxShape);
+            try {
+                var voxelShape = blockState.getCollisionShape(null, null);
+                var boxes = voxelShape.getBoundingBoxes();
+                if (boxes.size() == 1) {
+                    return getOrMakeBoxShape(boxes.get(0));
+                } else {
+                    var shape = new btCompoundShape();
+                    var matrix4 = new Matrix4();
+                    for (var box : boxes) {
+                        var boxShape = getOrMakeBoxShape(box);
+                        var center = box.getCenter();
+                        matrix4.set(
+                                (float) center.x, (float) center.y, (float) center.z,
+                                0f, 0f, 0f, 1f
+                        );
+                        shape.addChildShape(matrix4, boxShape);
+                    }
+                    return shape;
                 }
-                return shape;
+            } catch (Exception exception) {
+                return new btCompoundShape();
             }
         });
     }

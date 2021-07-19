@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class DimTypeMixin {
 
     @Inject(method = "addRegistryDefaults", at = @At("RETURN"))
-    private static void fuck(DynamicRegistryManager.Impl registryManager, CallbackInfoReturnable<DynamicRegistryManager.Impl> cir) {
+    private static void registerCustomDim(DynamicRegistryManager.Impl registryManager, CallbackInfoReturnable<DynamicRegistryManager.Impl> cir) {
         MutableRegistry<DimensionType> mutableRegistry = registryManager.getMutable(Registry.DIMENSION_TYPE_KEY);
 
-        mutableRegistry.add(WorldShellMain.STORAGE_DIM_TYPE_KEY, WorldShellMain.STORAGE_TIME_TYPE, Lifecycle.stable());
+        mutableRegistry.add(WorldShellMain.STORAGE_DIM_TYPE_KEY, WorldShellMain.STORAGE_DIM_TYPE, Lifecycle.stable());
     }
 }

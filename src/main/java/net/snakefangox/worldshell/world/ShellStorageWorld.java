@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleEffect;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.snakefangox.worldshell.WSNetworking;
 import net.snakefangox.worldshell.entity.WorldShellEntity;
+import net.snakefangox.worldshell.math.Vector3d;
 import net.snakefangox.worldshell.storage.Bay;
 import net.snakefangox.worldshell.storage.ShellStorageData;
 import net.snakefangox.worldshell.util.WorldShellPacketHelper;
@@ -124,6 +126,9 @@ public class ShellStorageWorld extends ServerWorld implements Worldshell {
 			Vec3d newPos = bay.toEntityGlobalSpace(entity.getPos());
 			entity.setPosition(newPos.x, newPos.y, newPos.z);
 			entity.world = worldLinkEntity.getEntityWorld();
+			var vel = entity.getVelocity();
+			var vec = bay.getLinkedEntity().get().getRotation().multLocal(new Vector3d(vel.x, vel.y, vel.z));
+			entity.setVelocity(new Vec3d(vec.x, vec.y, vec.z));
 			return worldLinkEntity.getEntityWorld().spawnEntity(entity);
 		});
 	}

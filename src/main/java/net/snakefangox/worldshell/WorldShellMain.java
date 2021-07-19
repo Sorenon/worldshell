@@ -34,13 +34,13 @@ import java.util.function.Supplier;
 
 public class WorldShellMain implements ModInitializer {
 
-	public static final String MODID = "worldshell";
+	public static final String MODID = "worldshell-fork";
 	public static final Logger LOGGER = LogManager.getLogger();
 
 	public static final RegistryKey<World> STORAGE_DIM = RegistryKey.of(Registry.WORLD_KEY, new Identifier(MODID, "shell_storage"));
 
 	public static final RegistryKey<DimensionType> STORAGE_DIM_TYPE_KEY = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(MODID, "shell_storage_type"));
-	public static final DimensionType STORAGE_TIME_TYPE = DimensionType.create(
+	public static final DimensionType STORAGE_DIM_TYPE = DimensionType.create(
 			OptionalLong.of(6000),
 			true,
 			false,
@@ -79,7 +79,7 @@ public class WorldShellMain implements ModInitializer {
 		Bullet.init();
 
 		LOGGER.info("Moving blocks and fudging collision!");
-		LOGGER.info("(Worldshell has started successfully)");
+		LOGGER.info("(Worldshell-fork has started successfully)");
 	}
 
 	public void registerStorageDim() {

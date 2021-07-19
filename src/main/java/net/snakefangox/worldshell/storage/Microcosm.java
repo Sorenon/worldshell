@@ -2,12 +2,12 @@ package net.snakefangox.worldshell.storage;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.client.render.chunk.BlockBufferBuilderStorage;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
@@ -18,7 +18,6 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.level.ColorResolver;
-import net.snakefangox.worldshell.client.WorldShellRenderCache;
 import net.snakefangox.worldshell.entity.WorldShellEntity;
 import net.snakefangox.worldshell.world.DelegateWorld;
 import net.snakefangox.worldshell.world.Worldshell;
@@ -36,7 +35,7 @@ public class Microcosm implements BlockRenderView, Worldshell {
 	private final List<ShellTickInvoker> tickInvokers = new ArrayList<>();
 	private final BlockPos.Mutable reusablePos = new BlockPos.Mutable();
 	@Environment(EnvType.CLIENT)
-	private final WorldShellRenderCache cache;
+	private final BlockBufferBuilderStorage cache;
 	private final int cacheValidTime;
 	private int cacheResetTimer = 0;
 
@@ -51,7 +50,7 @@ public class Microcosm implements BlockRenderView, Worldshell {
 	/** Creates a client sided microcosm, with the render cache */
 	public Microcosm(WorldShellEntity parent, int cacheValidTime) {
 		this.parent = parent;
-		cache = new WorldShellRenderCache();
+		cache = new BlockBufferBuilderStorage();
 		this.cacheValidTime = cacheValidTime;
 		delegateWorld = new DelegateWorld(parent.getEntityWorld(), this);
 	}
@@ -103,12 +102,20 @@ public class Microcosm implements BlockRenderView, Worldshell {
 	}
 
 	public void setBlock(BlockPos pos, BlockState state, NbtCompound tag) {
+		blockStateMap.remove(pos);
+		BlockEntity oldBe = blockEntityMap.remove(pos);
+		if (oldBe != null) tickInvokers.remove(new ShellTickInvoker(oldBe, null));
+
+		markCacheInvalid();
+		if (state.isAir()) {
+			return;
+		}
+
 		blockStateMap.put(pos, state);
 		if (state.hasBlockEntity()) {
 			BlockEntity be = ((BlockEntityProvider) state.getBlock()).createBlockEntity(pos, state);
 			if (be != null) {
-				BlockEntity oldBe = blockEntityMap.put(pos, be);
-				if (oldBe != null) tickInvokers.remove(new ShellTickInvoker(oldBe, null));
+				blockEntityMap.put(pos, be);
 				be.setWorld(delegateWorld);
 				be.setCachedState(blockStateMap.get(pos));
 				if (tag != null) be.readNbt(tag);
@@ -116,7 +123,6 @@ public class Microcosm implements BlockRenderView, Worldshell {
 				if (ticker != null) tickInvokers.add(new ShellTickInvoker(be, ticker));
 			}
 		}
-		markCacheInvalid();
 	}
 
 	public void addBlockEvent(BlockPos pos, int type, int data) {
@@ -140,22 +146,21 @@ public class Microcosm implements BlockRenderView, Worldshell {
 
 	@Override
 	public int getLightLevel(LightType type, BlockPos pos) {
-		return getLightingProvider().get(type).getLightLevel(toWorldPos(pos));
+		return parent.getEntityWorld().getLightLevel(type, toWorldPos(pos));
 	}
 
 	@Override
 	public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
-		return getLightingProvider().getLight(toWorldPos(pos), ambientDarkness);
+		return parent.getEntityWorld().getBaseLightLevel(toWorldPos(pos), ambientDarkness);
 	}
 
 	@Override
 	public boolean isSkyVisible(BlockPos pos) {
-		return getLightLevel(LightType.SKY, toWorldPos(pos)) >= this.getMaxLightLevel();
+		return parent.getEntityWorld().isSkyVisible(toWorldPos(pos));
 	}
 
 	private BlockPos toWorldPos(BlockPos pos) {
-		Vec3d offset = parent.getBlockOffset();
-		return reusablePos.set(pos).add(offset.x, offset.y, offset.z).add(parent.getBlockPos());
+		return parent.toGlobal(pos);
 	}
 
 	public void tick() {
@@ -185,7 +190,7 @@ public class Microcosm implements BlockRenderView, Worldshell {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public WorldShellRenderCache getCache() {
+	public BlockBufferBuilderStorage getCache() {
 		return cache;
 	}
 

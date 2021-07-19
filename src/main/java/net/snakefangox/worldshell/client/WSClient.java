@@ -24,8 +24,8 @@ public class WSClient implements ClientModInitializer {
 				Vec3d camPos = context.camera().getPos();
 				matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 
-//				var physicsWorld = ((WorldExt)context.world()).getPhysics();
-				var physicsWorld = ((WorldExt)MinecraftClient.getInstance().getServer().getOverworld()).getPhysics();
+				var physicsWorld = ((WorldExt)context.world()).getPhysics();
+//				var physicsWorld = ((WorldExt)MinecraftClient.getInstance().getServer().getOverworld()).getPhysics();
 
 				physicsWorld.debugDrawer.consumer = context.consumers().getBuffer(RenderLayer.getLines());
 
