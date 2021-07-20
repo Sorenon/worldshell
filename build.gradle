@@ -16,6 +16,18 @@ repositories {
     flatDir {
         dirs 'libs'
     }
+    maven {
+        name = "CottonMC"
+        url = "https://server.bbkr.space/artifactory/libs-release"
+    }
+    maven {
+        name = 'Ladysnake Mods'
+        url = 'https://ladysnake.jfrog.io/artifactory/mods'
+    }
+    maven {
+        name = 'Jitpack'
+        url = 'https://jitpack.io'
+    }
 }
 
 sourceSets {
@@ -57,6 +69,13 @@ dependencies {
 
     shadow(implementation("com.badlogicgames.gdx:gdx-bullet:${project.libgdk_version}"))
     shadow(implementation("com.badlogicgames.gdx:gdx-bullet-platform:${project.libgdk_version}:natives-desktop"))
+
+    modRuntime name: 'hyperstellar-1.0.0-dev'
+
+    modRuntime "com.github.Snakefangox:rapid-register:2.1"
+    modRuntime "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:3.0.0"
+    modRuntime "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:3.0.0"
+    modRuntime "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-scoreboard:3.0.0"
 
     // Needed for the test mod
     testmodImplementation sourceSets.main.output

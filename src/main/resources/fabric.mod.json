@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "worldshell_fork",
+  "id": "worldshell",
   "version": "${version}",
-  "name": "WorldShell Fork",
+  "name": "WorldShell",
   "description": "A library mod to allow moving collections of blocks that can function, collide and interact with the world around them.",
   "authors": [
     "Snakefangox", "Sorenon"
@@ -24,14 +24,13 @@
   ],
   "accessWidener": "worldshell.accesswidener",
   "depends": {
-    "fabricloader": ">=0.11.0",
+    "fabricloader": ">=0.11.6",
     "fabric": "*",
     "minecraft": ">=1.17"
   },
   "custom": {
     "modmenu": {
-      "badges": [ "library" ],
-      "parent": "grappleship"
+      "badges": [ "library" ]
     }
   }
 }

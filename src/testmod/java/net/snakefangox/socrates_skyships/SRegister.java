@@ -7,9 +7,9 @@ import net.snakefangox.rapidregister.annotations.RegisterContents;
 import net.snakefangox.socrates_skyships.blocks.ShipsHelm;
 import net.snakefangox.socrates_skyships.entities.AirShip;
 import net.snakefangox.socrates_skyships.entities.GhastAirShip;
-import net.snakefangox.worldshell_fork.entity.WorldShellEntityType;
-import net.snakefangox.worldshell_fork.entity.WorldShellSettings;
-import net.snakefangox.worldshell_fork.transfer.ConflictSolver;
+import net.snakefangox.worldshell.entity.WorldShellEntityType;
+import net.snakefangox.worldshell.entity.WorldShellSettings;
+import net.snakefangox.worldshell.transfer.ConflictSolver;
 
 @RegisterContents(defaultBlockMeta = @BlockMeta(blockItemGroup = "transportation"))
 public class SRegister {

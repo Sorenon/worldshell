@@ -16,9 +16,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.snakefangox.socrates_skyships.SRegister;
-import net.snakefangox.worldshell_fork.entity.WorldShellEntity;
-import net.snakefangox.worldshell_fork.kevlar.PhysicsWorld;
-import net.snakefangox.worldshell_fork.math.Quaternion;
+import net.snakefangox.worldshell.entity.WorldShellEntity;
+import net.snakefangox.worldshell.kevlar.PhysicsWorld;
+import net.snakefangox.worldshell.math.Quaternion;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;

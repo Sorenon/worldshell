@@ -17,8 +17,8 @@ import net.minecraft.world.World;
 import net.snakefangox.socrates_skyships.BlockScan;
 import net.snakefangox.socrates_skyships.SRegister;
 import net.snakefangox.socrates_skyships.entities.GhastAirShip;
-import net.snakefangox.worldshell_fork.transfer.WorldShellConstructor;
-import net.snakefangox.worldshell_fork.world.Worldshell;
+import net.snakefangox.worldshell.transfer.WorldShellConstructor;
+import net.snakefangox.worldshell.world.Worldshell;
 import org.jetbrains.annotations.Nullable;
 
 public class ShipsHelm extends Block {

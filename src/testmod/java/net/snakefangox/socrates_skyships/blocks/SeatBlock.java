@@ -9,8 +9,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.snakefangox.worldshell_fork.entity.WorldShellEntity;
-import net.snakefangox.worldshell_fork.storage.ShellAwareBlock;
+import net.snakefangox.worldshell.entity.WorldShellEntity;
+import net.snakefangox.worldshell.storage.ShellAwareBlock;
 
 public class SeatBlock extends Block implements ShellAwareBlock {
     public SeatBlock() {
