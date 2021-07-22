@@ -1,6 +1,7 @@
 package net.snakefangox.worldshell.mixin.server;
 
 import com.google.common.collect.ImmutableList;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerTask;
 import net.minecraft.server.WorldGenerationProgressListener;
@@ -99,6 +100,7 @@ public abstract class MinecraftServerMixin extends ReentrantThreadExecutor<Serve
 		ServerWorld serverWorld = worldSupplier.create((MinecraftServer) (Object) this, workerExecutor, session, unmodifiableLevelProperties, worldRegistryKey, dimensionType, worldGenerationProgressListenerFactory.create(0), chunkGenerator, isDebug, seed, ImmutableList.of(), false);
 		getWorld(World.OVERWORLD).getWorldBorder().addListener(new WorldBorderListener.WorldBorderSyncer(serverWorld.getWorldBorder()));
 		worlds.put(worldRegistryKey, serverWorld);
+		ServerWorldEvents.LOAD.invoker().onWorldLoad((MinecraftServer) (Object) this, serverWorld);
 		return serverWorld;
 	}
 
